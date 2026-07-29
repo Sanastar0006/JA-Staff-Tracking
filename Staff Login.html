@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Jothi Anandham Chits - Staff Login</title> 
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+
+height:100vh;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:linear-gradient(135deg,#5b2be0,#7c4dff,#9c6dff);
+
+overflow:hidden;
+
+}
+
+body::before{
+
+content:"";
+position:absolute;
+
+width:600px;
+height:600px;
+
+background:rgba(255,255,255,.08);
+
+border-radius:50%;
+
+top:-250px;
+left:-200px;
+
+}
+
+body::after{
+
+content:"";
+position:absolute;
+
+width:500px;
+height:500px;
+
+background:rgba(255,255,255,.06);
+
+border-radius:50%;
+
+bottom:-220px;
+right:-150px;
+
+}
+
+.login-box{
+
+width:430px;
+
+background:rgba(255,255,255,.12);
+
+backdrop-filter:blur(20px);
+
+border:1px solid rgba(255,255,255,.25);
+
+border-radius:25px;
+
+padding:40px;
+
+box-shadow:0 15px 35px rgba(0,0,0,.30);
+
+position:relative;
+
+z-index:2;
+
+}
+
+.logo{
+
+text-align:center;
+
+font-size:60px;
+
+margin-bottom:10px;
+
+}
+
+.title{
+
+text-align:center;
+
+color:#fff;
+
+font-size:28px;
+
+font-weight:700;
+
+}
+
+.subtitle{
+
+text-align:center;
+
+color:#ddd;
+
+font-size:14px;
+
+margin-bottom:30px;
+
+}
+
+.input-group{
+
+margin-bottom:18px;
+
+}
+
+label{
+
+display:block;
+
+margin-bottom:8px;
+
+color:white;
+
+font-size:14px;
+
+font-weight:500;
+
+}
+
+input,select{
+
+width:100%;
+
+padding:14px;
+
+border:none;
+
+outline:none;
+
+border-radius:12px;
+
+font-size:15px;
+
+background:rgba(255,255,255,.92);
+
+}
+
+.password-box{
+
+position:relative;
+
+}
+
+.password-box span{
+
+position:absolute;
+
+right:15px;
+
+top:14px;
+
+cursor:pointer;
+
+font-size:18px;
+
+}
+
+.remember{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-top:15px;
+
+margin-bottom:20px;
+
+color:white;
+
+font-size:14px;
+
+}
+
+.remember input{
+
+width:auto;
+
+margin-right:5px;
+
+}
+
+button{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:15px;
+
+background:#fff;
+
+font-size:17px;
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.3s;
+
+color:#5b2be0;
+
+}
+
+button:hover{
+
+transform:translateY(-3px);
+
+box-shadow:0 10px 20px rgba(0,0,0,.25);
+
+}
+
+.footer{
+
+text-align:center;
+
+margin-top:25px;
+
+color:#eee;
+
+font-size:13px;
+
+}
+
+.footer b{
+
+color:white;
+
+}
+
+@media(max-width:500px){
+
+.login-box{
+
+width:92%;
+
+padding:25px;
+
+}
+
+.title{
+
+font-size:22px;
+
+}
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="login-box">
+
+<div class="logo">
+👨‍💼
+</div>
+
+<div class="title">
+Jothi Anandham Chits  
+</div>
+
+<div class="subtitle">
+Staff Login Portal
+</div>
+
+<form id="loginForm">
+
+<div class="input-group">
+
+<label>Staff ID</label>
+
+<input
+type="text"
+id="staffid"
+placeholder="Enter Staff ID"
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>Password</label>
+
+<div class="password-box">
+
+<input
+type="password"
+id="password"
+placeholder="Enter Password"
+required>
+
+<span onclick="togglePassword()">👁</span>
+
+</div>
+
+</div>
+
+<div class="input-group">
+
+<label>Role</label>
+
+<select id="role">
+
+<option value="">Select Role</option>
+
+<option>Admin</option>
+
+<option>Collection Executive</option>
+
+<option>Office Staff</option>
+
+</select>
+
+</div>
+
+<div class="remember">
+
+<label>
+
+<input type="checkbox">
+
+Remember Me
+
+</label>
+
+<a href="#" style="color:white;text-decoration:none;">
+Forgot Password?
+</a>
+
+</div>
+
+<button type="submit">
+LOGIN
+</button>
+
+</form>
+
+<div class="footer">
+
+© 2026 <b>Jothi Anandham Chits</b> 
+
+</div>
+
+</div>
+
+<script>
+
+function togglePassword(){
+
+let p=document.getElementById("password");
+
+if(p.type==="password"){
+
+p.type="text";
+
+}else{
+
+p.type="password";
+
+}
+
+}
+
+document
+.getElementById("loginForm")
+.addEventListener("submit",function(e){
+
+e.preventDefault();
+
+let staff=document.getElementById("staffid").value;
+
+let pass=document.getElementById("password").value;
+
+let role=document.getElementById("role").value;
+
+if(staff==="" || pass==="" || role===""){
+
+alert("Please fill all fields");
+
+return;
+
+}
+
+alert("Login Successful\n\nWelcome "+staff);
+
+});
+
+</script>
+
+</body>
+</html>
