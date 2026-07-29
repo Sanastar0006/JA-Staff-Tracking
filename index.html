@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Staff Tracker Pro</title>
+
+<link rel="stylesheet"
+href="css/style.css">
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="bg"></div>
+
+<div class="login-card">
+
+<div class="logo">
+
+<h1>STAFF TRACKER</h1>
+
+<p>Professional GPS Tracking System</p>
+
+</div>
+
+<form id="loginForm">
+
+<div class="inputBox">
+
+<label>Email</label>
+
+<input
+type="email"
+id="email"
+placeholder="Enter Email"
+required>
+
+</div>
+
+<div class="inputBox">
+
+<label>Password</label>
+
+<input
+type="password"
+id="password"
+placeholder="Enter Password"
+required>
+
+</div>
+
+<div class="inputBox">
+
+<label>Login As</label>
+
+<select id="role">
+
+<option value="staff">
+Staff
+</option>
+
+<option value="admin">
+Admin
+</option>
+
+</select>
+
+</div>
+
+<button
+type="submit"
+class="loginBtn">
+
+LOGIN
+
+</button>
+
+</form>
+
+<div id="message"></div>
+
+</div>
+
+<script type="module"
+src="js/login.js">
+
+</script>
+
+</body>
+
+</html>
