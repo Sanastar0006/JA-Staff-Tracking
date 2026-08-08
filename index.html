@@ -1,103 +1,2492 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JAC • Luxury Staff Tracking & Live Location</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-<meta charset="UTF-8">
+        body {
+            background: #f0f4f9;
+            min-height: 100vh;
+            padding: 15px;
+        }
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+        .app-container {
+            max-width: 480px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 0 auto;
+            position: relative;
+            min-height: 600px;
+        }
 
-<title>Staff Tracker Pro</title>
+        /* Header */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f4f9;
+        }
 
-<link rel="stylesheet"
-href="css/style.css">
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
+        .app-title i {
+            font-size: 22px;
+            color: #2563eb;
+            background: #e8edff;
+            padding: 8px 10px;
+            border-radius: 12px;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-rel="stylesheet">
+        .app-title h1 {
+            font-size: 18px;
+            color: #1a2a3a;
+            font-weight: 700;
+        }
+
+        .app-title span {
+            font-size: 10px;
+            color: #6b7a8a;
+            font-weight: 400;
+            display: block;
+        }
+
+        /* Dashboard Menu */
+        .dashboard-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-card {
+            background: #f8faff;
+            border-radius: 14px;
+            padding: 12px 6px;
+            text-align: center;
+            border: 2px solid #eef3fc;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+        }
+
+        .dashboard-card.active {
+            border-color: #2563eb;
+            background: #e8edff;
+        }
+
+        .dashboard-card i {
+            font-size: 22px;
+            color: #2563eb;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .dashboard-card .label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #2d3a4a;
+        }
+
+        .dashboard-card .badge {
+            background: #2563eb;
+            color: white;
+            font-size: 8px;
+            padding: 1px 6px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        .dashboard-card .badge.success {
+            background: #22c55e;
+        }
+
+        .dashboard-card .badge.warning {
+            background: #f59e0b;
+        }
+
+        /* Page Navigation */
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #2d3a4a;
+            margin-bottom: 3px;
+        }
+
+        .form-group label i {
+            color: #2563eb;
+            margin-right: 6px;
+            width: 16px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: 0.3s;
+            background: white;
+            color: #1a2a3a;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-secondary {
+            background: #f0f4f9;
+            color: #2d3a4a;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 11px;
+            width: auto;
+        }
+
+        .btn-xs {
+            padding: 4px 8px;
+            font-size: 10px;
+            width: auto;
+            border-radius: 6px;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        table th {
+            background: #f0f4f9;
+            color: #2d3a4a;
+            padding: 8px 6px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #eef3fc;
+            vertical-align: middle;
+        }
+
+        table tr:hover {
+            background: #f8faff;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        .status-dot.tracking {
+            background: #22c55e;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-dot.not-tracking {
+            background: #f59e0b;
+        }
+
+        .status-dot.inactive {
+            background: #94a3b8;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .action-btns .btn-xs {
+            padding: 3px 6px;
+            font-size: 9px;
+        }
+
+        /* Map */
+        #map {
+            width: 100%;
+            height: 250px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            border: 2px solid #e8edf5;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: #f8faff;
+            border-radius: 14px;
+            padding: 15px;
+            border: 2px solid #e8edf5;
+            margin-bottom: 10px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            font-weight: 700;
+        }
+
+        .profile-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a2a3a;
+        }
+
+        .profile-role {
+            font-size: 11px;
+            color: #6b7a8a;
+            background: #e8edff;
+            padding: 2px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        .profile-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #e8edf5;
+            font-size: 11px;
+        }
+
+        .profile-detail:last-child {
+            border-bottom: none;
+        }
+
+        .profile-detail .label {
+            color: #6b7a8a;
+            font-weight: 500;
+        }
+
+        .profile-detail .value {
+            color: #1a2a3a;
+            font-weight: 600;
+        }
+
+        /* Tracking Section */
+        .tracking-section {
+            background: #f0f7ff;
+            border-radius: 14px;
+            padding: 12px;
+            border: 2px solid #dbeafe;
+            margin-bottom: 10px;
+        }
+
+        .tracking-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tracking-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .pulse-dot.inactive {
+            background: #94a3b8;
+            animation: none;
+        }
+
+        .tracking-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 11px;
+        }
+
+        .tracking-btn.active {
+            background: #dc2626;
+            color: white;
+        }
+
+        .tracking-btn.active:hover {
+            background: #b91c1c;
+        }
+
+        .tracking-btn.inactive {
+            background: #22c55e;
+            color: white;
+        }
+
+        .tracking-btn.inactive:hover {
+            background: #16a34a;
+        }
+
+        /* Top Menu */
+        .top-menu {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            padding: 4px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 500;
+            color: #2d3a4a;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .menu-btn:hover {
+            background: #f0f4f9;
+        }
+
+        .menu-btn i {
+            font-size: 12px;
+        }
+
+        /* Location Permission */
+        .location-permission {
+            background: #fff3cd;
+            border-radius: 14px;
+            padding: 12px;
+            border: 2px solid #ffc107;
+            margin-bottom: 10px;
+        }
+
+        .location-permission .icon {
+            font-size: 18px;
+            color: #ffc107;
+        }
+
+        /* Location Log */
+        .location-log {
+            max-height: 90px;
+            overflow-y: auto;
+            background: #f8faff;
+            border-radius: 10px;
+            padding: 6px;
+            border: 1px solid #eef3fc;
+            margin-top: 6px;
+        }
+
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px solid #eef3fc;
+            font-size: 10px;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #22c55e;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-weight: 500;
+            display: none;
+            z-index: 1000;
+            max-width: 260px;
+            font-size: 12px;
+        }
+
+        .notification.error {
+            background: #dc2626;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Route Info */
+        .route-info {
+            background: #f8faff;
+            border-radius: 10px;
+            padding: 8px;
+            border: 1px solid #eef3fc;
+            margin-bottom: 8px;
+        }
+
+        .route-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            font-size: 11px;
+            border-bottom: 1px solid #eef3fc;
+        }
+
+        .route-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .route-info-item .label {
+            color: #6b7a8a;
+        }
+
+        .route-info-item .value {
+            color: #1a2a3a;
+            font-weight: 600;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card {
+            background: #f8faff;
+            border-radius: 10px;
+            padding: 6px;
+            text-align: center;
+            border: 1px solid #eef3fc;
+        }
+
+        .stat-card .number {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0b2b4a;
+        }
+
+        .stat-card .label {
+            font-size: 7px;
+            font-weight: 600;
+            color: #5d7188;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .page-header h2 {
+            font-size: 15px;
+            color: #1a2a3a;
+        }
+
+        .page-header .close-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #6b7a8a;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .page-header .close-btn:hover {
+            color: #dc2626;
+        }
+
+        /* Search */
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .search-box input:focus {
+            border-color: #2563eb;
+            outline: none;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 420px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 12px;
+            color: #1a2a3a;
+            font-size: 16px;
+        }
+
+        /* Tracking History Table */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-top: 10px;
+        }
+
+        .history-table th {
+            background: #2563eb;
+            color: white;
+            padding: 6px 4px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 9px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .history-table td {
+            padding: 5px 4px;
+            border-bottom: 1px solid #eef3fc;
+            font-size: 9px;
+        }
+
+        .history-table tr:hover {
+            background: #f8faff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+
+        .status-badge.traveling {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-badge.stopped {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-badge.waiting {
+            background: #fce4ec;
+            color: #dc2626;
+        }
+
+        /* Current Location Display */
+        .current-location-box {
+            background: #f0f7ff;
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid #dbeafe;
+            margin-bottom: 10px;
+        }
+
+        .current-location-box .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 11px;
+        }
+
+        .current-location-box .label {
+            color: #6b7a8a;
+        }
+
+        .current-location-box .value {
+            font-weight: 600;
+            color: #1a2a3a;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .app-container { padding: 12px; }
+            .form-row { grid-template-columns: 1fr; }
+            .dashboard-menu { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .dashboard-card { padding: 10px 4px; }
+            .dashboard-card i { font-size: 18px; }
+            .dashboard-card .label { font-size: 8px; }
+            .top-menu { gap: 2px; }
+            .menu-btn { font-size: 9px; padding: 3px 5px; }
+            .menu-btn span { display: none; }
+            #map { height: 200px; }
+            table { font-size: 9px; }
+            table th, table td { padding: 4px 3px; }
+            .action-btns .btn-xs { font-size: 7px; padding: 2px 4px; }
+            .history-table { font-size: 8px; }
+            .history-table th, .history-table td { padding: 3px 2px; }
+        }
+    
+
+/* =========================================================
+   JAC LUXURY UI — PREMIUM GLASS / PURPLE GOLD THEME
+   Keeps the original application logic intact.
+   ========================================================= */
+:root{
+  --lux-bg:#090714;
+  --lux-panel:rgba(20,16,38,.82);
+  --lux-panel2:rgba(31,25,55,.78);
+  --lux-border:rgba(255,255,255,.10);
+  --lux-text:#f7f3ff;
+  --lux-muted:#aaa1bf;
+  --lux-purple:#8b5cf6;
+  --lux-purple2:#6d28d9;
+  --lux-gold:#f5c76a;
+  --lux-gold2:#d99a2b;
+  --lux-green:#35d07f;
+  --lux-red:#ff5d73;
+  --lux-shadow:0 30px 90px rgba(0,0,0,.45);
+}
+*{scrollbar-width:thin;scrollbar-color:#4b3b75 transparent}
+html{background:var(--lux-bg)}
+body{
+  background:
+    radial-gradient(circle at 10% 0%,rgba(139,92,246,.22),transparent 30%),
+    radial-gradient(circle at 90% 10%,rgba(245,199,106,.12),transparent 25%),
+    linear-gradient(135deg,#080611,#120d22 48%,#090714);
+  color:var(--lux-text);padding:24px;min-height:100vh;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 90%);
+}
+.app-container{
+  max-width:1180px;width:100%;min-height:720px;margin:0 auto;padding:26px;
+  background:linear-gradient(145deg,rgba(24,19,45,.92),rgba(11,9,24,.94));
+  border:1px solid var(--lux-border);border-radius:30px;box-shadow:var(--lux-shadow);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);overflow:hidden;
+}
+.app-header{margin-bottom:22px;padding:0 0 18px;border-bottom:1px solid var(--lux-border)}
+.app-title{gap:13px}
+.app-title i{
+  font-size:24px;color:#fff;background:linear-gradient(135deg,var(--lux-purple),var(--lux-purple2));
+  padding:12px;border-radius:15px;box-shadow:0 10px 30px rgba(109,40,217,.35)
+}
+.app-title h1{font-size:23px;letter-spacing:.5px;color:#fff}
+.app-title span{font-size:11px;color:var(--lux-muted);margin-top:2px}
+.top-menu{gap:6px}
+.menu-btn{color:#d9d2e8;background:rgba(255,255,255,.04);border:1px solid transparent;padding:8px 10px;border-radius:10px}
+.menu-btn:hover{background:rgba(255,255,255,.08);border-color:var(--lux-border);color:#fff}
+.menu-btn i{color:var(--lux-gold)}
+.dashboard-menu{grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.dashboard-card{
+  position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(40,31,70,.86),rgba(22,17,42,.86));
+  border:1px solid var(--lux-border);border-radius:20px;padding:22px 12px;box-shadow:0 12px 30px rgba(0,0,0,.18)
+}
+.dashboard-card:before{content:"";position:absolute;inset:-40px auto auto -40px;width:100px;height:100px;background:rgba(139,92,246,.18);filter:blur(20px);border-radius:50%}
+.dashboard-card:hover{transform:translateY(-5px);box-shadow:0 18px 45px rgba(0,0,0,.32);border-color:rgba(139,92,246,.45)}
+.dashboard-card.active{border-color:var(--lux-gold);background:linear-gradient(145deg,rgba(70,51,92,.92),rgba(31,22,54,.92))}
+.dashboard-card i{font-size:28px;color:#c4a1ff;margin-bottom:9px;position:relative}
+.dashboard-card .label{font-size:12px;color:#fff;letter-spacing:.3px;position:relative}
+.dashboard-card .badge{background:linear-gradient(135deg,var(--lux-purple),#a78bfa);font-size:9px;padding:3px 9px;margin-top:7px}
+.dashboard-card .badge.success{background:linear-gradient(135deg,#169b59,var(--lux-green))}
+.dashboard-card .badge.warning{background:linear-gradient(135deg,#b87513,var(--lux-gold))}
+.page{animation:luxFade .35s ease}
+@keyframes luxFade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.page-header{margin-bottom:18px}
+.page-header h2,.page-header h3{color:#fff;font-weight:750;letter-spacing:.2px}
+.page-header h2 i,.page-header h3 i{color:var(--lux-gold)!important}
+.page-header .close-btn{color:#bdb4d1;background:rgba(255,255,255,.04);border:1px solid var(--lux-border);border-radius:9px}
+.page-header .close-btn:hover{color:#fff;background:rgba(255,93,115,.15)}
+.form-group label{color:#d9d2e8;font-size:11px}
+.form-group label i{color:var(--lux-gold)}
+.form-group input,.form-group select,.search-box input{
+  background:rgba(255,255,255,.045);color:#fff;border:1px solid rgba(255,255,255,.11);border-radius:12px;padding:12px 13px
+}
+.form-group input::placeholder,.search-box input::placeholder{color:#807790}
+.form-group input:focus,.form-group select:focus,.search-box input:focus{border-color:var(--lux-purple);box-shadow:0 0 0 4px rgba(139,92,246,.14);background:rgba(255,255,255,.065)}
+.form-group select option{background:#1a1430;color:#fff}
+.btn{border-radius:12px;padding:11px 16px;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.btn-primary{background:linear-gradient(135deg,var(--lux-purple),var(--lux-purple2));color:#fff}
+.btn-primary:hover{background:linear-gradient(135deg,#9b72ff,#7c3aed)}
+.btn-success{background:linear-gradient(135deg,#159957,var(--lux-green));color:#fff}
+.btn-danger{background:linear-gradient(135deg,#dc3545,var(--lux-red));color:#fff}
+.btn-warning{background:linear-gradient(135deg,#b97812,var(--lux-gold));color:#16100a}
+.btn-secondary{background:rgba(255,255,255,.07);color:#e8e2f2;border:1px solid var(--lux-border)}
+.btn-secondary:hover{background:rgba(255,255,255,.12)}
+.table-container,.profile-card,.tracking-section,.route-info,.current-location-box,.location-log,.stat-card,.location-permission{
+  background:linear-gradient(145deg,rgba(38,30,64,.72),rgba(19,15,37,.72));border:1px solid var(--lux-border);box-shadow:0 10px 30px rgba(0,0,0,.14)
+}
+.table-container{border-radius:16px;padding:4px;overflow:auto}
+table{color:#e9e4f2;font-size:12px}
+table th{background:rgba(139,92,246,.17);color:#f4edff;border-bottom:1px solid rgba(255,255,255,.12)}
+table td{border-bottom:1px solid rgba(255,255,255,.07)}
+table tr:hover{background:rgba(139,92,246,.08)}
+.status-dot.tracking{background:var(--lux-green)}
+.status-dot.not-tracking{background:var(--lux-gold)}
+.status-dot.inactive{background:#777086}
+.profile-card{padding:20px;border-radius:18px}
+.profile-avatar{background:linear-gradient(135deg,var(--lux-purple),var(--lux-gold2));box-shadow:0 12px 30px rgba(109,40,217,.28)}
+.profile-name,.profile-detail .value,.route-info-item .value,.current-location-box .value{color:#fff}
+.profile-role{background:rgba(139,92,246,.18);color:#d9c8ff;border:1px solid rgba(139,92,246,.22)}
+.profile-detail{border-bottom-color:rgba(255,255,255,.08)}
+.profile-detail .label,.route-info-item .label,.current-location-box .label{color:#a99fbc}
+.tracking-section{background:linear-gradient(135deg,rgba(28,70,56,.45),rgba(25,20,46,.72));border-color:rgba(53,208,127,.22)}
+.tracking-btn.active{background:linear-gradient(135deg,#dc3545,var(--lux-red))}
+.tracking-btn.inactive{background:linear-gradient(135deg,#159957,var(--lux-green))}
+.pulse-dot{background:var(--lux-green)}
+.stats-grid{gap:12px}
+.stat-card{padding:14px;border-radius:14px}
+.stat-card .number{font-size:19px;color:#fff}
+.stat-card .label{font-size:8px;color:#aaa1bf}
+#map{height:430px;border-radius:18px;border:1px solid var(--lux-border);box-shadow:0 15px 40px rgba(0,0,0,.25);filter:saturate(.9) contrast(1.02)}
+.location-permission{background:linear-gradient(135deg,rgba(120,84,22,.24),rgba(35,25,49,.8));border-color:rgba(245,199,106,.3)}
+.location-permission .icon{color:var(--lux-gold)}
+.location-log{border-radius:12px}
+.log-entry{border-bottom-color:rgba(255,255,255,.07);color:#d8d0e5}
+.modal{background:rgba(4,2,10,.78);backdrop-filter:blur(8px)}
+.modal-content{background:linear-gradient(145deg,#211a38,#100c20);border:1px solid var(--lux-border);border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.55);color:#fff}
+.modal-content h3{color:#fff}
+.history-table th{background:linear-gradient(135deg,var(--lux-purple2),#4c1d95)}
+.history-table td{border-bottom-color:rgba(255,255,255,.07);color:#ddd5e9}
+.history-table tr:hover{background:rgba(139,92,246,.08)}
+.notification{top:24px;right:24px;background:linear-gradient(135deg,#159957,var(--lux-green));border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.notification.error{background:linear-gradient(135deg,#c62f42,var(--lux-red))}
+#dashboardMenu>div:last-child{color:#8f86a3!important;border-top-color:var(--lux-border)!important}
+
+/* Desktop two-column feel for forms while preserving mobile layout */
+@media (min-width:760px){
+  #masterForm{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+  #masterForm>.form-group:nth-child(1),#masterForm>.form-group:nth-child(2),#masterForm>.form-group:nth-child(7),#masterForm>.btn-secondary,#masterForm>#credentialsSection{grid-column:1/-1}
+  #masterForm>.form-row{grid-column:1/-1}
+  #credentialsSection{display:block}
+  #usersPage .table-container{min-height:360px}
+}
+@media (max-width:760px){body{padding:10px}.app-container{padding:16px;border-radius:22px}.dashboard-menu{grid-template-columns:1fr 1fr;gap:9px}.dashboard-card{padding:16px 8px}#map{height:280px}.app-title h1{font-size:20px}}
+
+</style>
+
+
+
+
+<style id="white-orange-luxury-theme">
+:root{
+  --lux-white:#ffffff;
+  --lux-surface:#ffffff;
+  --lux-surface-2:#fffaf5;
+  --lux-border:#eee5dc;
+  --lux-text:#24201d;
+  --lux-muted:#77706a;
+  --lux-orange:#f47b20;
+  --lux-orange-dark:#d9610d;
+  --lux-orange-light:#fff1e5;
+  --lux-shadow:0 12px 35px rgba(90,55,25,.08);
+}
+html,body{
+  background:#ffffff !important;
+  color:var(--lux-text) !important;
+}
+body{
+  background:#ffffff !important;
+}
+body::before,body::after{display:none !important}
+
+/* No dark theme / dark background anywhere */
+.dark,.dark-theme,.dark-mode,[data-theme="dark"]{
+  background:#fff !important;
+  color:var(--lux-text) !important;
+}
+
+/* White luxury surfaces */
+.container,.wrapper,.dashboard,.page,.card,.dashboard-card,
+.profile-card,.modal-content,table,.table-container,.form-card,
+.panel,.login-card,header,nav,footer{
+  background:#fff !important;
+  color:var(--lux-text) !important;
+}
+.dashboard-card,.card,.profile-card,.modal-content,.form-card,
+.panel,.login-card,.table-container{
+  border:1px solid var(--lux-border) !important;
+  box-shadow:var(--lux-shadow) !important;
+}
+.dashboard-card:hover{
+  border-color:rgba(244,123,32,.28) !important;
+  box-shadow:0 18px 45px rgba(244,123,32,.12) !important;
+}
+h1,h2,h3,h4,h5,h6,.page-header h2,.profile-name{
+  color:#24201d !important;
+}
+p,label,.profile-role,.profile-detail .label,.muted,small{
+  color:var(--lux-muted) !important;
+}
+
+/* Orange luxury accents */
+a{color:var(--lux-orange) !important}
+input,select,textarea{
+  background:#fff !important;
+  color:#24201d !important;
+  border:1px solid #ded8d2 !important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--lux-orange) !important;
+  box-shadow:0 0 0 3px rgba(244,123,32,.11) !important;
+}
+.btn-primary{
+  background:linear-gradient(135deg,#f47b20,#ff9a4d) !important;
+  color:#fff !important;border:0 !important;
+}
+.btn-success{
+  background:linear-gradient(135deg,#e96d16,#f99a52) !important;
+  color:#fff !important;border:0 !important;
+}
+.btn-warning{
+  background:#fff5eb !important;
+  color:#c85b0d !important;
+  border:1px solid #f2c9a7 !important;
+}
+.btn-danger{
+  background:#fff1f0 !important;
+  color:#c23f35 !important;
+  border:1px solid #efc5c1 !important;
+}
+.btn-secondary{
+  background:#f7f5f3 !important;
+  color:#4c4844 !important;
+  border:1px solid #ded9d4 !important;
+}
+.badge{
+  background:#fff2e7 !important;
+  color:#d86112 !important;
+  border:1px solid #f4cfb1 !important;
+}
+.badge.success{
+  background:#f0faf4 !important;
+  color:#21864a !important;
+  border-color:#ccebd8 !important;
+}
+.profile-avatar{
+  background:linear-gradient(135deg,#f47b20,#ffb06e) !important;
+  color:#fff !important;
+  box-shadow:0 8px 20px rgba(244,123,32,.20) !important;
+}
+.close-btn{
+  background:#fff !important;color:#555 !important;
+  border:1px solid #e3ded9 !important;
+}
+.close-btn:hover{
+  color:var(--lux-orange) !important;
+  border-color:#f0c4a1 !important;
+}
+thead th{
+  background:#fffaf5 !important;
+  color:#5f5852 !important;
+  border-bottom:1px solid #eee5dc !important;
+}
+tbody td{
+  background:#fff !important;
+  color:#292522 !important;
+  border-bottom:1px solid #f1ece8 !important;
+}
+tbody tr:hover td{background:#fffaf6 !important}
+.log-entry{
+  background:#fffaf5 !important;
+  border:1px solid #eee5dc !important;
+}
+.notification{
+  background:#fff !important;color:#24201d !important;
+  border:1px solid #eee5dc !important;
+  box-shadow:0 14px 35px rgba(70,45,25,.10) !important;
+}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#fff}
+::-webkit-scrollbar-thumb{background:#ddd5ce;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#c9bfb7}
+
+/* Hide any visible dark-mode toggle/control */
+#darkModeToggle,#darkToggle,.dark-toggle,.theme-toggle,
+[data-action="dark-mode"],[data-theme-toggle="dark"]{
+  display:none !important;
+}
+</style>
+
+
+<style id="exact-orange-header-fix">
+/* Exact area shown in screenshot: remove dark shell */
+body{
+  background:#ffffff !important;
+  color:#24201d !important;
+}
+body:before, body:after{
+  display:none !important;
+}
+.app-container{
+  background:#ffffff !important;
+  border:1px solid #eee5dc !important;
+  box-shadow:0 18px 55px rgba(90,55,25,.08) !important;
+}
+
+/* Header strip = orange luxury, NOT dark */
+.app-container > .app-header,
+.app-header{
+  background:linear-gradient(135deg,#f47b20 0%,#f58a35 52%,#ffad68 100%) !important;
+  margin:-26px -26px 22px !important;
+  padding:20px 26px 18px !important;
+  border-bottom:0 !important;
+  border-radius:30px 30px 0 0 !important;
+}
+.app-header .app-title h1,
+.app-header .app-title span,
+.app-header .menu-btn{
+  color:#ffffff !important;
+}
+.app-header .menu-btn{
+  background:rgba(255,255,255,.13) !important;
+  border-color:rgba(255,255,255,.18) !important;
+}
+.app-header .menu-btn:hover{
+  background:rgba(255,255,255,.23) !important;
+  color:#ffffff !important;
+}
+.app-header .menu-btn i{
+  color:#fff8ef !important;
+}
+.app-header .app-title i{
+  color:#f47b20 !important;
+  background:#ffffff !important;
+  box-shadow:0 8px 22px rgba(120,55,10,.16) !important;
+}
+
+/* Everything after the orange header remains clean white */
+.dashboard-menu,
+.page,
+.profile-card,
+.card,
+.table-container,
+.form-card,
+.panel,
+.login-card{
+  background:#ffffff !important;
+}
+</style>
 
 </head>
-
 <body>
 
-<div class="bg"></div>
+    <div class="app-container">
+        <!-- Notification -->
+        <div id="notification" class="notification"></div>
 
-<div class="login-card">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="app-title">
+                <i class="fas fa-users"></i>
+                <div>
+                    <h1>JAC</h1>
+                    <span id="headerSubtext">Dashboard</span>
+                </div>
+            </div>
+            <div id="headerMenu" style="display:none;" class="top-menu">
+                <button class="menu-btn" onclick="showProfile()">
+                    <i class="fas fa-user-circle"></i> <span>Profile</span>
+                </button>
+                <button class="menu-btn" onclick="alert('Settings coming soon!')">
+                    <i class="fas fa-cog"></i> <span>Settings</span>
+                </button>
+                <button class="menu-btn" onclick="logoutUser()" style="color:#dc2626;">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </button>
+            </div>
+        </div>
 
-<div class="logo">
+        <!-- ==================== DASHBOARD MENU ==================== -->
+        <div id="dashboardMenu">
+            <div class="dashboard-menu">
+                <div class="dashboard-card" onclick="switchPage('master')">
+                    <i class="fas fa-user-plus"></i>
+                    <div class="label">Master</div>
+                    <span class="badge">Register</span>
+                </div>
+                <div class="dashboard-card" onclick="switchPage('users')">
+                    <i class="fas fa-users"></i>
+                    <div class="label">Users</div>
+                    <span class="badge" id="userCountBadge">0</span>
+                </div>
+                <div class="dashboard-card" onclick="switchPage('login')">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <div class="label">Login</div>
+                    <span class="badge">Sign In</span>
+                </div>
+                <div class="dashboard-card" onclick="switchPage('tracking')">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <div class="label">Tracking</div>
+                    <span class="badge" id="trackingBadge">Live</span>
+                </div>
+            </div>
+            <div style="text-align:center; padding:8px; color:#6b7a8a; font-size:11px; border-top:1px solid #eef3fc;">
+                <i class="fas fa-arrow-up"></i> Select an option above
+            </div>
+        </div>
 
-<h1>STAFF TRACKER</h1>
+        <!-- ==================== PAGE 1: MASTER (Registration) ==================== -->
+        <div id="masterPage" class="page">
+            <div class="page-header">
+                <h2><i class="fas fa-user-plus" style="color:#2563eb;"></i> Employee Registration</h2>
+                <button class="close-btn" onclick="goToDashboard()">✕</button>
+            </div>
 
-<p>Professional GPS Tracking System</p>
+            <form id="masterForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Employee Name</label>
+                    <input type="text" id="empName" placeholder="Enter full name" required>
+                </div>
 
-</div>
+                <div class="form-group">
+                    <label><i class="fas fa-briefcase"></i> Designation</label>
+                    <select id="empDesignation" required>
+                        <option value="">Select Designation</option>
+                        <option value="Collection">Collection</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Officers">Officers</option>
+                    </select>
+                </div>
 
-<form id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-id-card"></i> Employee ID</label>
+                    <input type="text" id="empId" placeholder="Enter employee ID" required>
+                </div>
 
-<div class="inputBox">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-tint"></i> Blood Group</label>
+                        <select id="empBlood" required>
+                            <option value="">Select</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Contact Number</label>
+                        <input type="tel" id="empContact" placeholder="10 digits" required>
+                    </div>
+                </div>
 
-<label>Email</label>
+                <div class="form-group">
+                    <label><i class="fas fa-phone-alt"></i> Emergency Contact</label>
+                    <input type="tel" id="empEmergency" placeholder="Emergency contact number" required>
+                </div>
 
-<input
-type="email"
-id="email"
-placeholder="Enter Email"
-required>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Mail ID</label>
+                    <input type="email" id="empEmail" placeholder="Enter email address" required>
+                </div>
 
-</div>
+                <div class="form-group">
+                    <label><i class="fas fa-map-pin"></i> Address</label>
+                    <input type="text" id="empAddress" placeholder="Enter address">
+                </div>
 
-<div class="inputBox">
+                <button type="button" class="btn btn-secondary" onclick="nextStep()">
+                    <i class="fas fa-arrow-right"></i> Next
+                </button>
 
-<label>Password</label>
+                <div id="credentialsSection" style="display:none; border-top:2px solid #f0f4f9; padding-top:12px; margin-top:12px;">
+                    <div class="form-group">
+                        <label><i class="fas fa-user-circle"></i> Create Username</label>
+                        <input type="text" id="empUsername" placeholder="Choose a username" required>
+                    </div>
 
-<input
-type="password"
-id="password"
-placeholder="Enter Password"
-required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-lock"></i> Create Password</label>
+                            <input type="password" id="empPassword" placeholder="Min 6 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-check-circle"></i> Confirm Password</label>
+                            <input type="password" id="empConfirmPassword" placeholder="Re-enter password" required>
+                        </div>
+                    </div>
 
-</div>
+                    <button type="submit" class="btn btn-success" onclick="submitRegistration()">
+                        <i class="fas fa-save"></i> Submit
+                    </button>
+                </div>
+            </form>
+        </div>
 
-<div class="inputBox">
+        <!-- ==================== PAGE 2: USERS DETAILS ==================== -->
+        <div id="usersPage" class="page">
+            <div class="page-header">
+                <h2><i class="fas fa-users" style="color:#2563eb;"></i> Users Details</h2>
+                <button class="close-btn" onclick="goToDashboard()">✕</button>
+            </div>
 
-<label>Login As</label>
+            <div class="search-box">
+                <input type="text" id="searchUser" placeholder="🔍 Search by name or ID..." onkeyup="filterUsers()">
+                <button class="btn btn-primary btn-sm" onclick="refreshUsers()" style="width:auto; padding:8px 12px;">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
 
-<select id="role">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Designation</th>
+                            <th>Status</th>
+                            <th>View</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align:center; color:#6b7a8a; padding:20px;">
+                                <i class="fas fa-spinner fa-spin"></i> Loading users...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:10px; text-align:center; font-size:10px; color:#6b7a8a;">
+                Total Users: <span id="totalUsersDisplay">0</span>
+            </div>
+        </div>
 
-<option value="staff">
-Staff
-</option>
+        <!-- ==================== PAGE 3: LOGIN ==================== -->
+        <div id="loginPage" class="page">
+            <div class="page-header">
+                <h2><i class="fas fa-sign-in-alt" style="color:#2563eb;"></i> Login</h2>
+                <button class="close-btn" onclick="goToDashboard()">✕</button>
+            </div>
 
-<option value="admin">
-Admin
-</option>
+            <form id="loginForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" onclick="loginUser()">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <p style="text-align:center; margin-top:10px; color:#6b7a8a; font-size:12px;">
+                    Don't have an account? <a href="#" onclick="switchPage('master')" style="color:#2563eb; text-decoration:none; font-weight:600;">Register</a>
+                </p>
+            </form>
+        </div>
 
-</select>
+        <!-- ==================== PAGE 4: TRACKING ==================== -->
+        <div id="trackingPage" class="page">
+            <div class="page-header">
+                <h2><i class="fas fa-map-marked-alt" style="color:#2563eb;"></i> Live Tracking</h2>
+                <button class="close-btn" onclick="goToDashboard()">✕</button>
+            </div>
 
-</div>
+            <!-- Profile Section -->
+            <div class="profile-card" id="profileCard">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">JD</div>
+                    <div>
+                        <div class="profile-name" id="profileName">John Doe</div>
+                        <div class="profile-role" id="profileRole">Collection</div>
+                    </div>
+                </div>
+                <div class="profile-detail">
+                    <span class="label"><i class="fas fa-id-card"></i> Employee ID</span>
+                    <span class="value" id="profileId">-</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="label"><i class="fas fa-tint"></i> Blood Group</span>
+                    <span class="value" id="profileBlood">-</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="label"><i class="fas fa-phone"></i> Contact Number</span>
+                    <span class="value" id="profileContact">-</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="label"><i class="fas fa-phone-alt"></i> Emergency Contact</span>
+                    <span class="value" id="profileEmergency">-</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="label"><i class="fas fa-envelope"></i> Mail ID</span>
+                    <span class="value" id="profileEmail">-</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="label"><i class="fas fa-map-pin"></i> Address</span>
+                    <span class="value" id="profileAddress">-</span>
+                </div>
+            </div>
 
-<button
-type="submit"
-class="loginBtn">
+            <!-- Current Location Display -->
+            <div class="current-location-box">
+                <div class="row">
+                    <span class="label"><i class="fas fa-location-dot"></i> Current Location</span>
+                    <span class="value" id="currentLocationDisplay">Waiting for GPS...</span>
+                </div>
+                <div class="row">
+                    <span class="label"><i class="fas fa-clock"></i> Last Update</span>
+                    <span class="value" id="lastUpdateDisplay">Never</span>
+                </div>
+            </div>
 
-LOGIN
+            <!-- Location Permission -->
+            <div id="locationPermission" class="location-permission">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-exclamation-triangle icon"></i>
+                    <div>
+                        <p style="font-weight:600; color:#856404; font-size:12px;">Location Access Required</p>
+                        <p style="font-size:10px; color:#856404;">Please allow location tracking</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="margin-top:6px;" onclick="requestLocation()">
+                    <i class="fas fa-location-dot"></i> Allow Location
+                </button>
+            </div>
 
-</button>
+            <!-- Map -->
+            <div id="map"></div>
 
-</form>
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number" id="totalDistance">0</div>
+                    <div class="label"><i class="fas fa-road"></i> Distance</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="totalTime">00:00</div>
+                    <div class="label"><i class="fas fa-clock"></i> Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="avgSpeed">0</div>
+                    <div class="label"><i class="fas fa-tachometer-alt"></i> Speed</div>
+                </div>
+            </div>
 
-<div id="message"></div>
+            <!-- Route Info -->
+            <div class="route-info">
+                <div class="route-info-item">
+                    <span class="label"><i class="fas fa-flag-checkered"></i> Status</span>
+                    <span class="value" id="routeStatus">🟡 Not tracking</span>
+                </div>
+                <div class="route-info-item">
+                    <span class="label"><i class="fas fa-location-dot"></i> Current Location</span>
+                    <span class="value" id="currentLocation">Waiting for GPS...</span>
+                </div>
+                <div class="route-info-item">
+                    <span class="label"><i class="fas fa-clock"></i> Last Update</span>
+                    <span class="value" id="lastUpdate">Never</span>
+                </div>
+                <div class="route-info-item">
+                    <span class="label"><i class="fas fa-arrows-up-down"></i> Points</span>
+                    <span class="value" id="pointCount">0</span>
+                </div>
+            </div>
 
-</div>
+            <!-- Location Tracking Button -->
+            <div class="tracking-section">
+                <div class="tracking-status">
+                    <div class="tracking-info">
+                        <div class="pulse-dot inactive" id="trackingDot"></div>
+                        <div>
+                            <p style="font-weight:600; color:#1a2a3a; font-size:12px;">Live Location Tracking</p>
+                            <p style="font-size:10px; color:#6b7a8a;" id="trackingStatus">Not tracking</p>
+                        </div>
+                    </div>
+                    <button class="tracking-btn inactive" id="trackingToggle" onclick="toggleTracking()">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                </div>
+            </div>
 
-<script type="module"
-src="js/login.js">
+            <!-- Location Log -->
+            <h4 style="font-size:11px; color:#1a2a3a; margin:6px 0 4px;">
+                <i class="fas fa-history" style="color:#2563eb;"></i> Route History
+            </h4>
+            <div class="location-log" id="locationLog">
+                <p style="text-align:center; color:#a0b0c0; font-size:10px;">No route data yet</p>
+            </div>
+        </div>
 
-</script>
+        <div style="margin-top:22px;padding-top:14px;border-top:1px solid var(--lux-border);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#8f86a3;font-size:10px;">
+            <span><i class="fas fa-shield-halved" style="color:var(--lux-gold);margin-right:5px;"></i> JAC Premium Control Center</span>
+            <span>Secure • Live • Professional</span>
+        </div>
+    </div>
+
+    <!-- ==================== VIEW USER MODAL ==================== -->
+    <div class="modal" id="viewUserModal">
+        <div class="modal-content">
+            <div class="page-header">
+                <h3><i class="fas fa-user" style="color:#2563eb;"></i> <span id="viewUserName">User Details</span></h3>
+                <button class="close-btn" onclick="closeViewModal()">✕</button>
+            </div>
+            
+            <!-- User Info -->
+            <div id="viewUserDetails">
+                <div class="profile-detail"><span class="label">Employee ID</span><span class="value" id="viewUserId">-</span></div>
+                <div class="profile-detail"><span class="label">Designation</span><span class="value" id="viewUserDesignation">-</span></div>
+                <div class="profile-detail"><span class="label">Blood Group</span><span class="value" id="viewUserBlood">-</span></div>
+                <div class="profile-detail"><span class="label">Contact</span><span class="value" id="viewUserContact">-</span></div>
+                <div class="profile-detail"><span class="label">Emergency</span><span class="value" id="viewUserEmergency">-</span></div>
+                <div class="profile-detail"><span class="label">Email</span><span class="value" id="viewUserEmail">-</span></div>
+                <div class="profile-detail"><span class="label">Address</span><span class="value" id="viewUserAddress">-</span></div>
+                <div class="profile-detail"><span class="label">Status</span><span class="value" id="viewUserStatus">-</span></div>
+            </div>
+
+            <!-- Current Location -->
+            <div style="margin-top:12px; background:#f0f7ff; border-radius:10px; padding:10px; border:1px solid #dbeafe;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; padding:2px 0;">
+                    <span style="color:#6b7a8a;">Current Location</span>
+                    <span style="font-weight:600; color:#1a2a3a;" id="viewUserCurrentLoc">-</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; padding:2px 0;">
+                    <span style="color:#6b7a8a;">Last Update</span>
+                    <span style="font-weight:600; color:#1a2a3a;" id="viewUserLastUpdate">-</span>
+                </div>
+            </div>
+
+            <!-- Tracking History -->
+            <div style="margin-top:12px;">
+                <h4 style="font-size:12px; color:#1a2a3a; margin-bottom:6px;">
+                    <i class="fas fa-history" style="color:#2563eb;"></i> Tracking History
+                </h4>
+                <div style="overflow-x:auto;">
+                    <table class="history-table" id="viewUserHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>Time</th>
+                                <th>Stay</th>
+                                <th>Traveling</th>
+                                <th>Waiting</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viewUserHistoryBody">
+                            <tr>
+                                <td colspan="5" style="text-align:center; color:#6b7a8a; padding:15px;">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading history...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" style="margin-top:10px;" onclick="closeViewModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- ==================== EDIT USER MODAL ==================== -->
+    <div class="modal" id="editUserModal">
+        <div class="modal-content">
+            <div class="page-header">
+                <h3><i class="fas fa-edit" style="color:#f59e0b;"></i> Edit User</h3>
+                <button class="close-btn" onclick="closeEditModal()">✕</button>
+            </div>
+            <form id="editUserForm" onsubmit="return false;">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>Employee Name</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label>Designation</label>
+                    <select id="editDesignation">
+                        <option value="Collection">Collection</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Officers">Officers</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Employee ID</label>
+                    <input type="text" id="editId" required>
+                </div>
+                <div class="form-group">
+                    <label>Blood Group</label>
+                    <select id="editBlood">
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="tel" id="editContact" required>
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact</label>
+                    <input type="tel" id="editEmergency" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="editAddress">
+                </div>
+                <div style="display:flex; gap:8px; margin-top:10px;">
+                    <button type="submit" class="btn btn-success" onclick="updateUser()">
+                        <i class="fas fa-save"></i> Update
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // ========== GOOGLE SHEETS CONFIGURATION ==========
+        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+        
+        // ========== GLOBAL VARIABLES ==========
+        let currentUser = null;
+        let allEmployees = JSON.parse(localStorage.getItem('jac_employees')) || [];
+        let map, marker, polyline, routePath = [];
+        let trackingActive = false;
+        let watchId = null;
+        let startTime = null;
+        let totalDistance = 0;
+        let locationHistory = [];
+        let routePoints = [];
+        let lastLocation = null;
+        let locationTimestamps = [];
+
+        // ========== DASHBOARD NAVIGATION ==========
+        function goToDashboard() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('dashboardMenu').style.display = 'block';
+            document.getElementById('headerMenu').style.display = 'none';
+            document.getElementById('headerSubtext').textContent = 'Dashboard';
+            document.querySelectorAll('.dashboard-card').forEach(c => c.classList.remove('active'));
+            refreshUsers();
+        }
+
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(page + 'Page').classList.add('active');
+            document.getElementById('dashboardMenu').style.display = 'none';
+            
+            document.querySelectorAll('.dashboard-card').forEach(c => c.classList.remove('active'));
+            
+            if (page === 'master') {
+                document.querySelector('.dashboard-card:nth-child(1)').classList.add('active');
+                document.getElementById('headerSubtext').textContent = 'Registration';
+                document.getElementById('headerMenu').style.display = 'none';
+            } else if (page === 'users') {
+                document.querySelector('.dashboard-card:nth-child(2)').classList.add('active');
+                document.getElementById('headerSubtext').textContent = 'Users Details';
+                document.getElementById('headerMenu').style.display = 'none';
+                refreshUsers();
+            } else if (page === 'login') {
+                document.querySelector('.dashboard-card:nth-child(3)').classList.add('active');
+                document.getElementById('headerSubtext').textContent = 'Login';
+                document.getElementById('headerMenu').style.display = 'none';
+            } else if (page === 'tracking') {
+                document.querySelector('.dashboard-card:nth-child(4)').classList.add('active');
+                document.getElementById('headerSubtext').textContent = 'Live Tracking';
+                document.getElementById('headerMenu').style.display = 'flex';
+                
+                if (!currentUser) {
+                    showNotification('Please login first', 'error');
+                    setTimeout(() => switchPage('login'), 1000);
+                    return;
+                }
+                
+                loadUserProfile(currentUser);
+                checkLocationPermission();
+                setTimeout(initMap, 300);
+            }
+        }
+
+        // ========== USERS PAGE ==========
+        function refreshUsers() {
+            allEmployees = JSON.parse(localStorage.getItem('jac_employees')) || [];
+            document.getElementById('userCountBadge').textContent = allEmployees.length;
+            renderUsers(allEmployees);
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; color:#6b7a8a; padding:20px;">
+                            <i class="fas fa-users"></i> No users found
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('totalUsersDisplay').textContent = '0';
+                return;
+            }
+
+            let html = '';
+            users.forEach((user, index) => {
+                const isTracking = user.isTracking || false;
+                const statusText = isTracking ? '🟢 Tracking' : '🟡 Not tracking';
+                const statusClass = isTracking ? 'tracking' : 'not-tracking';
+                
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${user.id || '-'}</strong></td>
+                        <td>${user.name || '-'}</td>
+                        <td>${user.designation || '-'}</td>
+                        <td>
+                            <span class="status-dot ${statusClass}"></span>
+                            ${statusText}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-xs" onclick="viewUser('${user.username}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn btn-warning btn-xs" onclick="editUser('${user.username}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-xs" onclick="deleteUser('${user.username}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+            document.getElementById('totalUsersDisplay').textContent = users.length;
+        }
+
+        function filterUsers() {
+            const search = document.getElementById('searchUser').value.toLowerCase().trim();
+            if (!search) {
+                renderUsers(allEmployees);
+                return;
+            }
+            const filtered = allEmployees.filter(u => 
+                u.name.toLowerCase().includes(search) || 
+                u.id.toLowerCase().includes(search) ||
+                u.designation.toLowerCase().includes(search)
+            );
+            renderUsers(filtered);
+        }
+
+        // ========== VIEW USER ==========
+        function viewUser(username) {
+            const user = allEmployees.find(u => u.username === username);
+            if (!user) {
+                showNotification('User not found', 'error');
+                return;
+            }
+
+            // Set user info
+            document.getElementById('viewUserName').textContent = user.name;
+            document.getElementById('viewUserId').textContent = user.id || '-';
+            document.getElementById('viewUserDesignation').textContent = user.designation || '-';
+            document.getElementById('viewUserBlood').textContent = user.blood || '-';
+            document.getElementById('viewUserContact').textContent = user.contact || '-';
+            document.getElementById('viewUserEmergency').textContent = user.emergency || '-';
+            document.getElementById('viewUserEmail').textContent = user.email || '-';
+            document.getElementById('viewUserAddress').textContent = user.address || '-';
+            document.getElementById('viewUserStatus').textContent = user.isTracking ? '🟢 Tracking' : '🟡 Not tracking';
+            
+            // Set current location
+            const userHistory = JSON.parse(localStorage.getItem('jac_user_history_' + username)) || [];
+            if (userHistory.length > 0) {
+                const last = userHistory[userHistory.length - 1];
+                document.getElementById('viewUserCurrentLoc').textContent = 
+                    `${last.lat.toFixed(6)}, ${last.lng.toFixed(6)} (${last.accuracy || 0}m)`;
+                document.getElementById('viewUserLastUpdate').textContent = last.time || 'Never';
+            } else {
+                document.getElementById('viewUserCurrentLoc').textContent = 'No data';
+                document.getElementById('viewUserLastUpdate').textContent = 'Never';
+            }
+            
+            // Show tracking history
+            renderUserHistory(userHistory, username);
+            
+            document.getElementById('viewUserModal').classList.add('show');
+        }
+
+        function renderUserHistory(history, username) {
+            const tbody = document.getElementById('viewUserHistoryBody');
+            
+            if (!history || history.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#6b7a8a; padding:15px;">
+                            <i class="fas fa-info-circle"></i> No tracking history
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Calculate stay times
+            let html = '';
+            let lastTime = null;
+            let lastLat = null;
+            let lastLng = null;
+            let isTraveling = false;
+            let travelStartTime = null;
+
+            for (let i = 0; i < history.length; i++) {
+                const entry = history[i];
+                const currentTime = new Date(entry.time).getTime();
+                
+                let stayTime = '-';
+                let travelingTime = '-';
+                let waitingTime = '-';
+                let status = 'stopped';
+
+                if (i > 0) {
+                    const prevTime = new Date(history[i-1].time).getTime();
+                    const diffMinutes = Math.round((currentTime - prevTime) / 60000);
+                    
+                    if (diffMinutes > 5) {
+                        // Stay time calculated
+                        stayTime = diffMinutes + ' min';
+                        status = 'stopped';
+                    } else {
+                        // Traveling
+                        const lat1 = history[i-1].lat;
+                        const lng1 = history[i-1].lng;
+                        const lat2 = entry.lat;
+                        const lng2 = entry.lng;
+                        const dist = calculateDistance(lat1, lng1, lat2, lng2);
+                        
+                        if (dist > 10) { // More than 10 meters - traveling
+                            travelingTime = '🚗 Traveling';
+                            status = 'traveling';
+                            isTraveling = true;
+                            if (!travelStartTime) travelStartTime = history[i-1].time;
+                        } else {
+                            waitingTime = diffMinutes + ' min';
+                            status = 'waiting';
+                        }
+                    }
+                }
+
+                const statusBadge = status === 'traveling' ? 'traveling' : 
+                                   status === 'waiting' ? 'waiting' : 'stopped';
+                const statusLabel = status === 'traveling' ? '🚗 Traveling' :
+                                   status === 'waiting' ? '⏳ Waiting' : '📍 Stopped';
+
+                html += `
+                    <tr>
+                        <td>${entry.lat.toFixed(6)}, ${entry.lng.toFixed(6)}</td>
+                        <td>${entry.time || '-'}</td>
+                        <td>${stayTime}</td>
+                        <td><span class="status-badge ${statusBadge}">${travelingTime}</span></td>
+                        <td>${waitingTime}</td>
+                    </tr>
+                `;
+            }
+
+            tbody.innerHTML = html;
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewUserModal').classList.remove('show');
+        }
+
+        // ========== EDIT USER ==========
+        function editUser(username) {
+            const user = allEmployees.find(u => u.username === username);
+            if (!user) {
+                showNotification('User not found', 'error');
+                return;
+            }
+
+            document.getElementById('editUserId').value = username;
+            document.getElementById('editName').value = user.name || '';
+            document.getElementById('editDesignation').value = user.designation || 'Collection';
+            document.getElementById('editId').value = user.id || '';
+            document.getElementById('editBlood').value = user.blood || 'A+';
+            document.getElementById('editContact').value = user.contact || '';
+            document.getElementById('editEmergency').value = user.emergency || '';
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('editAddress').value = user.address || '';
+            
+            document.getElementById('editUserModal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editUserModal').classList.remove('show');
+        }
+
+        function updateUser() {
+            const username = document.getElementById('editUserId').value;
+            const userIndex = allEmployees.findIndex(u => u.username === username);
+            
+            if (userIndex === -1) {
+                showNotification('User not found', 'error');
+                return;
+            }
+
+            const updatedUser = {
+                ...allEmployees[userIndex],
+                name: document.getElementById('editName').value.trim(),
+                designation: document.getElementById('editDesignation').value,
+                id: document.getElementById('editId').value.trim(),
+                blood: document.getElementById('editBlood').value,
+                contact: document.getElementById('editContact').value.trim(),
+                emergency: document.getElementById('editEmergency').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                address: document.getElementById('editAddress').value.trim()
+            };
+
+            allEmployees[userIndex] = updatedUser;
+            localStorage.setItem('jac_employees', JSON.stringify(allEmployees));
+            
+            closeEditModal();
+            refreshUsers();
+            showNotification('✅ User updated successfully!', 'success');
+        }
+
+        // ========== DELETE USER ==========
+        function deleteUser(username) {
+            if (!confirm(`Are you sure you want to delete user: ${username}?`)) {
+                return;
+            }
+
+            allEmployees = allEmployees.filter(u => u.username !== username);
+            localStorage.setItem('jac_employees', JSON.stringify(allEmployees));
+            
+            // Also delete user history
+            localStorage.removeItem('jac_user_history_' + username);
+            
+            if (currentUser && currentUser.username === username) {
+                currentUser = null;
+                localStorage.removeItem('jac_current_user');
+                document.getElementById('trackingBadge').textContent = 'Live';
+            }
+            
+            refreshUsers();
+            showNotification('🗑️ User deleted successfully', 'success');
+        }
+
+        // ========== MASTER PAGE ==========
+        function nextStep() {
+            const name = document.getElementById('empName').value.trim();
+            const designation = document.getElementById('empDesignation').value;
+            const id = document.getElementById('empId').value.trim();
+            const blood = document.getElementById('empBlood').value;
+            const contact = document.getElementById('empContact').value.trim();
+            const emergency = document.getElementById('empEmergency').value.trim();
+            const email = document.getElementById('empEmail').value.trim();
+
+            if (!name || !designation || !id || !blood || !contact || !emergency || !email) {
+                showNotification('Please fill all required fields', 'error');
+                return;
+            }
+
+            document.getElementById('credentialsSection').style.display = 'block';
+            document.getElementById('credentialsSection').scrollIntoView({ behavior: 'smooth' });
+            showNotification('Fill credentials below', 'success');
+        }
+
+        function submitRegistration() {
+            const name = document.getElementById('empName').value.trim();
+            const designation = document.getElementById('empDesignation').value;
+            const id = document.getElementById('empId').value.trim();
+            const blood = document.getElementById('empBlood').value;
+            const contact = document.getElementById('empContact').value.trim();
+            const emergency = document.getElementById('empEmergency').value.trim();
+            const email = document.getElementById('empEmail').value.trim();
+            const address = document.getElementById('empAddress').value.trim();
+            const username = document.getElementById('empUsername').value.trim();
+            const password = document.getElementById('empPassword').value;
+            const confirmPassword = document.getElementById('empConfirmPassword').value;
+
+            if (!name || !designation || !id || !blood || !contact || !emergency || !email || !username || !password || !confirmPassword) {
+                showNotification('Please fill all fields', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+
+            if (allEmployees.some(emp => emp.username === username)) {
+                showNotification('Username already taken!', 'error');
+                return;
+            }
+
+            const employee = {
+                name, designation, id, blood, contact, emergency, email, address,
+                username, password,
+                isTracking: false,
+                createdAt: new Date().toISOString()
+            };
+
+            allEmployees.push(employee);
+            localStorage.setItem('jac_employees', JSON.stringify(allEmployees));
+
+            saveToGoogleSheets(employee);
+
+            showNotification('✅ Employee registered successfully!', 'success');
+            document.getElementById('masterForm').reset();
+            document.getElementById('credentialsSection').style.display = 'none';
+            document.getElementById('userCountBadge').textContent = allEmployees.length;
+
+            setTimeout(() => {
+                switchPage('users');
+                refreshUsers();
+            }, 1500);
+        }
+
+        // ========== LOGIN PAGE ==========
+        function loginUser() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!username || !password) {
+                showNotification('Please enter username and password', 'error');
+                return;
+            }
+
+            const user = allEmployees.find(emp => emp.username === username && emp.password === password);
+            
+            if (!user) {
+                showNotification('❌ Invalid username or password', 'error');
+                return;
+            }
+
+            currentUser = user;
+            localStorage.setItem('jac_current_user', JSON.stringify(user));
+            document.getElementById('trackingBadge').textContent = '✓ Logged In';
+            document.getElementById('trackingBadge').className = 'badge success';
+            
+            showNotification(`✅ Welcome, ${user.name}!`, 'success');
+            switchPage('tracking');
+        }
+
+        // ========== TRACKING PAGE ==========
+        function loadUserProfile(user) {
+            if (!user) return;
+            document.getElementById('profileAvatar').textContent = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('profileName').textContent = user.name;
+            document.getElementById('profileRole').textContent = user.designation;
+            document.getElementById('profileId').textContent = user.id || '-';
+            document.getElementById('profileBlood').textContent = user.blood || '-';
+            document.getElementById('profileContact').textContent = user.contact || '-';
+            document.getElementById('profileEmergency').textContent = user.emergency || '-';
+            document.getElementById('profileEmail').textContent = user.email || '-';
+            document.getElementById('profileAddress').textContent = user.address || '-';
+        }
+
+        function checkLocationPermission() {
+            if (navigator.geolocation) {
+                navigator.permissions.query({ name: 'geolocation' }).then(result => {
+                    if (result.state === 'granted') {
+                        document.getElementById('locationPermission').style.display = 'none';
+                    } else {
+                        document.getElementById('locationPermission').style.display = 'block';
+                    }
+                });
+            }
+        }
+
+        function requestLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('locationPermission').style.display = 'none';
+                        showNotification('📍 Location access granted!', 'success');
+                        const pos = [position.coords.latitude, position.coords.longitude];
+                        if (map) {
+                            map.setView(pos, 16);
+                            marker.setLatLng(pos);
+                        }
+                    },
+                    (error) => {
+                        showNotification('❌ Location access denied', 'error');
+                    }
+                );
+            }
+        }
+
+        // ========== MAP INIT ==========
+        function initMap() {
+            const defaultLocation = [11.0168, 76.9558];
+            
+            if (!document.getElementById('map')) return;
+            if (map) {
+                map.invalidateSize();
+                return;
+            }
+
+            map = L.map('map').setView(defaultLocation, 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19
+            }).addTo(map);
+
+            const icon = L.divIcon({
+                html: '<div style="background:#2563eb; width:18px; height:18px; border-radius:50%; border:3px solid white; box-shadow:0 2px 10px rgba(0,0,0,0.3);"></div>',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+            });
+
+            marker = L.marker(defaultLocation, { icon: icon }).addTo(map);
+
+            polyline = L.polyline([], {
+                color: '#2563eb',
+                weight: 4,
+                opacity: 0.8
+            }).addTo(map);
+
+            loadSavedRoute();
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = [position.coords.latitude, position.coords.longitude];
+                        map.setView(pos, 16);
+                        marker.setLatLng(pos);
+                        document.getElementById('currentLocation').textContent = 
+                            `${pos[0].toFixed(6)}, ${pos[1].toFixed(6)}`;
+                        document.getElementById('currentLocationDisplay').textContent = 
+                            `${pos[0].toFixed(6)}, ${pos[1].toFixed(6)}`;
+                    },
+                    () => {}
+                );
+            }
+        }
+
+        function loadSavedRoute() {
+            const savedPath = localStorage.getItem('jac_route_path');
+            if (savedPath) {
+                try {
+                    routePath = JSON.parse(savedPath);
+                    routePoints = routePath.map(p => [p.lat, p.lng]);
+                    if (routePoints.length > 0) {
+                        polyline.setLatLngs(routePoints);
+                        document.getElementById('pointCount').textContent = routePath.length;
+                    }
+                } catch (e) {}
+            }
+
+            const savedDistance = localStorage.getItem('jac_total_distance');
+            if (savedDistance) {
+                totalDistance = parseFloat(savedDistance);
+                document.getElementById('totalDistance').textContent = (totalDistance / 1000).toFixed(2);
+            }
+
+            const savedHistory = localStorage.getItem('jac_route_history');
+            if (savedHistory) {
+                try {
+                    locationHistory = JSON.parse(savedHistory);
+                    updateLocationLog();
+                } catch (e) {}
+            }
+        }
+
+        // ========== TRACKING FUNCTIONS ==========
+        function toggleTracking() {
+            if (!currentUser) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (trackingActive) {
+                stopTracking();
+            } else {
+                startTracking();
+            }
+        }
+
+        function startTracking() {
+            if (!navigator.geolocation) {
+                showNotification('❌ Geolocation not supported', 'error');
+                return;
+            }
+
+            if (routePath.length === 0) {
+                routePath = [];
+                routePoints = [];
+                totalDistance = 0;
+                locationHistory = [];
+                polyline.setLatLngs([]);
+            }
+
+            startTime = new Date();
+            trackingActive = true;
+            
+            // Update user status
+            if (currentUser) {
+                const userIndex = allEmployees.findIndex(u => u.username === currentUser.username);
+                if (userIndex !== -1) {
+                    allEmployees[userIndex].isTracking = true;
+                    localStorage.setItem('jac_employees', JSON.stringify(allEmployees));
+                }
+            }
+            
+            document.getElementById('trackingToggle').innerHTML = '<i class="fas fa-stop"></i> Stop';
+            document.getElementById('trackingToggle').className = 'tracking-btn active';
+            document.getElementById('trackingStatus').textContent = '🟢 Live tracking active';
+            document.getElementById('routeStatus').textContent = '🟢 Tracking...';
+            document.getElementById('routeStatus').style.color = '#22c55e';
+            document.getElementById('trackingDot').className = 'pulse-dot';
+
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    const timestamp = new Date().toLocaleString();
+                    const coord = { lat, lng };
+
+                    // Update displays
+                    const locationText = `${lat.toFixed(6)}, ${lng.toFixed(6)} (${Math.round(accuracy)}m)`;
+                    document.getElementById('currentLocation').textContent = locationText;
+                    document.getElementById('currentLocationDisplay').textContent = locationText;
+                    document.getElementById('lastUpdate').textContent = timestamp;
+                    document.getElementById('lastUpdateDisplay').textContent = timestamp;
+
+                    const pos = [lat, lng];
+                    map.setView(pos, 16);
+                    marker.setLatLng(pos);
+
+                    routePath.push(coord);
+                    routePoints.push(pos);
+                    
+                    if (routePath.length > 1) {
+                        const prev = routePath[routePath.length - 2];
+                        const dist = calculateDistance(prev.lat, prev.lng, lat, lng);
+                        totalDistance += dist;
+                    }
+
+                    polyline.setLatLngs(routePoints);
+                    updateStats();
+
+                    const entry = { 
+                        lat, lng, 
+                        time: timestamp,
+                        accuracy: Math.round(accuracy),
+                        distance: (totalDistance / 1000).toFixed(2)
+                    };
+                    locationHistory.push(entry);
+                    updateLocationLog();
+
+                    // Save user-specific history
+                    const userHistoryKey = 'jac_user_history_' + currentUser.username;
+                    const userHistory = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
+                    userHistory.push(entry);
+                    localStorage.setItem(userHistoryKey, JSON.stringify(userHistory));
+
+                    localStorage.setItem('jac_route_history', JSON.stringify(locationHistory));
+                    localStorage.setItem('jac_route_path', JSON.stringify(routePath));
+                    localStorage.setItem('jac_total_distance', totalDistance);
+
+                    document.getElementById('pointCount').textContent = routePath.length;
+
+                    saveLocationToSheets({
+                        name: currentUser ? currentUser.name : 'User',
+                        id: currentUser ? currentUser.id : 'N/A',
+                        latitude: lat,
+                        longitude: lng,
+                        time: timestamp,
+                        distance: (totalDistance / 1000).toFixed(2)
+                    });
+
+                    if (routePath.length === 1) {
+                        showNotification('📍 Tracking started!', 'success');
+                        refreshUsers();
+                    }
+                },
+                (error) => {
+                    showNotification('⚠️ GPS error', 'error');
+                },
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 }
+            );
+        }
+
+        function stopTracking() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            trackingActive = false;
+            
+            // Update user status
+            if (currentUser) {
+                const userIndex = allEmployees.findIndex(u => u.username === currentUser.username);
+                if (userIndex !== -1) {
+                    allEmployees[userIndex].isTracking = false;
+                    localStorage.setItem('jac_employees', JSON.stringify(allEmployees));
+                }
+            }
+            
+            document.getElementById('trackingToggle').innerHTML = '<i class="fas fa-play"></i> Start';
+            document.getElementById('trackingToggle').className = 'tracking-btn inactive';
+            document.getElementById('trackingStatus').textContent = '⏸️ Tracking stopped';
+            document.getElementById('routeStatus').textContent = '⏹️ Tracking stopped';
+            document.getElementById('routeStatus').style.color = '#dc2626';
+            document.getElementById('trackingDot').className = 'pulse-dot inactive';
+            
+            showNotification(`⏹️ Route stopped - ${routePath.length} points`, 'success');
+            refreshUsers();
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function updateStats() {
+            const distanceKm = (totalDistance / 1000).toFixed(2);
+            document.getElementById('totalDistance').textContent = distanceKm;
+
+            if (startTime) {
+                const elapsed = Math.floor((new Date() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('totalTime').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                if (elapsed > 0 && totalDistance > 0) {
+                    const speed = (totalDistance / 1000) / (elapsed / 3600);
+                    document.getElementById('avgSpeed').textContent = speed.toFixed(1);
+                }
+            }
+        }
+
+        function updateLocationLog() {
+            const logEl = document.getElementById('locationLog');
+            if (locationHistory.length === 0) {
+                logEl.innerHTML = '<p style="text-align:center; color:#a0b0c0; font-size:10px;">No route data yet</p>';
+                return;
+            }
+
+            const recent = locationHistory.slice(-15).reverse();
+            logEl.innerHTML = recent.map(entry => 
+                `<div class="log-entry">
+                    <span class="coords">📍 ${entry.lat.toFixed(6)}, ${entry.lng.toFixed(6)}</span>
+                    <span class="time">${entry.time}</span>
+                </div>`
+            ).join('');
+        }
+
+        function showProfile() {
+            document.getElementById('profileCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ========== GOOGLE SHEETS INTEGRATION ==========
+        function saveToGoogleSheets(data) {
+            const sheetData = JSON.parse(localStorage.getItem('jac_sheet_data')) || [];
+            sheetData.push({ ...data, type: 'registration', timestamp: new Date().toISOString() });
+            localStorage.setItem('jac_sheet_data', JSON.stringify(sheetData));
+            
+            fetch(GOOGLE_SHEETS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    action: 'register',
+                    data: data 
+                })
+            }).catch(() => {
+                console.log('Google Sheets: Data saved locally');
+            });
+        }
+
+        function saveLocationToSheets(data) {
+            fetch(GOOGLE_SHEETS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    action: 'location',
+                    data: data 
+                })
+            }).catch(() => {
+                console.log('Google Sheets: Location saved locally');
+            });
+        }
+
+        // ========== LOGOUT ==========
+        function logoutUser() {
+            if (confirm('Are you sure you want to logout?')) {
+                if (watchId) {
+                    navigator.geolocation.clearWatch(watchId);
+                    watchId = null;
+                }
+                trackingActive = false;
+                
+                if (currentUser) {
+                    const userIndex = allEmployees.findIndex(u => u.username === currentUser.username);
+                    if (userIndex !== -1) {
+                        allEmployees[userIndex].isTracking = false;
+                        localStorage.setItem('jac_employees', JSON.stringify(allEmployees));
+                    }
+                }
+                
+                currentUser = null;
+                localStorage.removeItem('jac_current_user');
+                document.getElementById('trackingBadge').textContent = 'Live';
+                document.getElementById('trackingBadge').className = 'badge';
+                showNotification('👋 Logged out successfully', 'success');
+                setTimeout(goToDashboard, 500);
+            }
+        }
+
+        // ========== NOTIFICATION ==========
+        function showNotification(message, type = 'success') {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = 'notification show';
+            if (type === 'error') notif.classList.add('error');
+            clearTimeout(notif._timeout);
+            notif._timeout = setTimeout(() => notif.classList.remove('show'), 3000);
+        }
+
+        // ========== INIT ==========
+        (function init() {
+            const savedUser = localStorage.getItem('jac_current_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    document.getElementById('trackingBadge').textContent = '✓ Logged In';
+                    document.getElementById('trackingBadge').className = 'badge success';
+                    
+                    const userData = allEmployees.find(u => u.username === currentUser.username);
+                    if (userData && userData.isTracking) {
+                        document.getElementById('trackingBadge').textContent = '🟢 Tracking';
+                        document.getElementById('trackingBadge').className = 'badge success';
+                    }
+                } catch (e) {}
+            }
+
+            refreshUsers();
+            console.log('🏢 JAC Dashboard v4.0');
+            console.log('📋 Registered Employees:', allEmployees.length);
+            console.log('👤 Current User:', currentUser ? currentUser.name : 'Not logged in');
+        })();
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && map) {
+                setTimeout(() => map.invalidateSize(), 300);
+            }
+        });
+    </script>
 
 </body>
-
 </html>
