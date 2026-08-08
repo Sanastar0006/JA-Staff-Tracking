@@ -1153,6 +1153,275 @@ body:before, body:after{
 }
 </style>
 
+
+<style id="automatic-mobile-pc-responsive">
+/* ===== AUTOMATIC PC + TABLET + MOBILE RESPONSIVE ===== */
+*{box-sizing:border-box}
+html{width:100%;overflow-x:hidden}
+body{
+  width:100%;
+  min-width:0 !important;
+  overflow-x:hidden !important;
+  margin:0;
+}
+img,svg,canvas,iframe{max-width:100%;height:auto}
+
+/* Main shell automatically scales */
+.app-container{
+  width:min(1180px, calc(100% - 32px)) !important;
+  max-width:1180px !important;
+  margin:24px auto !important;
+  min-width:0 !important;
+}
+
+/* Header never overflows */
+.app-header{
+  width:100% !important;
+  min-width:0 !important;
+}
+.app-header > *{min-width:0}
+.app-title{min-width:0}
+.app-title h1,
+.app-title span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Dashboard cards automatically fit available width */
+.dashboard-grid,
+.cards-grid,
+.stats-grid,
+.dashboard-cards{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:16px;
+}
+.dashboard-card{min-width:0}
+
+/* Forms automatically become columns on large screens */
+.form-grid,
+.form-row,
+.form-section{
+  width:100%;
+  min-width:0;
+}
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+.form-group{min-width:0}
+input,select,textarea,button{max-width:100%;font-size:16px}
+
+/* Tables scroll instead of breaking mobile layout */
+.table-container,
+.table-responsive{
+  width:100%;
+  max-width:100%;
+  overflow-x:auto !important;
+  -webkit-overflow-scrolling:touch;
+}
+table{
+  width:100%;
+  min-width:680px;
+}
+
+/* Map stays responsive */
+#map,
+.map-container,
+.leaflet-container{
+  width:100% !important;
+  max-width:100% !important;
+}
+
+/* Modals fit every screen */
+.modal{
+  padding:12px !important;
+}
+.modal-content{
+  width:min(720px, calc(100vw - 24px)) !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 24px) !important;
+  overflow-y:auto !important;
+}
+
+/* ===== TABLET ===== */
+@media (max-width:900px){
+  .app-container{
+    width:calc(100% - 24px) !important;
+    margin:12px auto !important;
+  }
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+  .dashboard-grid,
+  .cards-grid,
+  .stats-grid,
+  .dashboard-cards{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width:600px){
+  .app-container{
+    width:100% !important;
+    max-width:none !important;
+    margin:0 !important;
+    border-radius:0 !important;
+    border-left:0 !important;
+    border-right:0 !important;
+  }
+
+  .app-container > .app-header,
+  .app-header{
+    margin:0 0 14px !important;
+    padding:14px 15px !important;
+    border-radius:0 !important;
+    min-height:58px;
+  }
+
+  .app-header{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:10px !important;
+  }
+
+  .app-title h1{
+    font-size:15px !important;
+    line-height:1.2 !important;
+  }
+  .app-title span{
+    font-size:9px !important;
+  }
+
+  .header-menu,
+  #headerMenu{
+    gap:5px !important;
+    flex-wrap:wrap !important;
+    justify-content:flex-end !important;
+  }
+
+  .menu-btn{
+    min-width:38px !important;
+    min-height:38px !important;
+    padding:8px !important;
+  }
+
+  .dashboard-grid,
+  .cards-grid,
+  .stats-grid,
+  .dashboard-cards{
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+  }
+
+  .dashboard-card{
+    width:100% !important;
+    min-height:88px !important;
+  }
+
+  .page{
+    width:100% !important;
+    padding:14px !important;
+  }
+
+  .page-header{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:8px !important;
+  }
+  .page-header h2{
+    font-size:18px !important;
+    line-height:1.25 !important;
+  }
+
+  .form-grid,
+  .form-row,
+  .profile-detail{
+    grid-template-columns:1fr !important;
+    flex-direction:column !important;
+  }
+
+  .form-group{
+    width:100% !important;
+  }
+
+  input,select,textarea{
+    width:100% !important;
+    min-height:44px !important;
+  }
+
+  button,.btn{
+    min-height:42px !important;
+  }
+
+  .action-btns{
+    display:flex !important;
+    flex-wrap:wrap !important;
+    gap:6px !important;
+  }
+
+  .profile-card{
+    width:100% !important;
+    padding:14px !important;
+  }
+
+  .profile-header{
+    gap:10px !important;
+  }
+
+  .profile-name{
+    font-size:17px !important;
+  }
+
+  #map,
+  .map-container,
+  .leaflet-container{
+    min-height:300px !important;
+  }
+
+  .modal-content{
+    width:calc(100vw - 20px) !important;
+    max-width:calc(100vw - 20px) !important;
+    margin:0 auto !important;
+    border-radius:16px !important;
+  }
+
+  .notification{
+    left:10px !important;
+    right:10px !important;
+    width:auto !important;
+    max-width:none !important;
+  }
+}
+
+/* ===== VERY SMALL PHONES ===== */
+@media (max-width:380px){
+  .app-header{
+    padding:12px 10px !important;
+  }
+  .app-title h1{font-size:13px !important}
+  .page{padding:10px !important}
+  .page-header h2{font-size:16px !important}
+  .dashboard-card{min-height:78px !important}
+}
+
+/* Touch-friendly controls */
+@media (hover:none) and (pointer:coarse){
+  button,.btn,.dashboard-card,.close-btn{
+    -webkit-tap-highlight-color:transparent;
+  }
+  .dashboard-card:hover{
+    transform:none !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
